@@ -1,0 +1,15 @@
+.c-gr-1{
+	background: linear-gradient(to bottom, #343a40 0%, #e9ecef 50%, #343a40 100%);
+}
+
+.c-gr-2{
+	background: linear-gradient(to right, #e9ecef 0%, #343a40 12%, #343a40 88%, #e9ecef 100%);
+}
+
+.c-gr-3{
+	background: linear-gradient(to right, #343a40 0%, #343a40 50%, #e9ecef 100%);
+}
+
+.c-tx-sh {
+    text-shadow: 0 0 5px #000000;
+}
