@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,1825 @@
     <title>Datawind</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.ico">
-    <script type="module" src="/datawind/js/work.js"></script>
 </head>
+
 <body>
 
     <!--html stage element-->
-        <canvas id="stage"></canvas>
+    <canvas id="stage"></canvas>
     <!--end html stage element-->
-    
 
+    <script>
+
+
+        'use strict';
+
+        class Background {
+
+            constructor(stage) {
+                //element za click listener
+                this.stage = stage;
+
+                this.sparcity = 5000;
+                this.sizeRange = 3;
+                this.speedRange = 4;
+
+                //prvo generiranje zvijezda
+                this.stars = this.generateStars(this.stage.canvas.width, this.stage.canvas.height, 0);
+            }
+
+
+            random(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+
+            generateStars(rangeX, rangeY, offsetY) {
+                let number = Math.floor((rangeX * rangeY / this.sparcity));
+                let newStars = new Array();
+
+                for (let i = 0; i < number; i++) {
+                    newStars.push({
+                        x: this.random(0, rangeX),
+                        y: (this.random(0, rangeY)) - offsetY,
+                        size: this.random(1, this.sizeRange),
+                        speed: this.random(1, this.speedRange)
+                    });
+                }
+
+                return newStars;
+
+            }
+
+
+            rebornStar(star) {
+                star.x = this.random(0, this.stage.canvas.width);
+                star.y = 0;
+                star.size = this.random(1, this.sizeRange);
+                this.speed = this.random(1, this.speedRange);
+            }
+
+
+            moveStars() {
+                for (let i = 0; i < this.stars.length; i++) {
+                    this.stars[i].y += this.stars[i].speed;
+                    //kad zvijezda izađe sa ekrana ponovno je randomiziraj na vrhu
+                    if (this.stars[i].y >= this.stage.canvas.height) {
+                        this.rebornStar(this.stars[i]);
+                    }
+                }
+            }
+
+
+            setupDraw() {
+                this.stage.strokeStyle = "rgba(255,255,255,1)";
+                this.stage.fillStyle = "rgba(255,255,255,1)";
+            }
+
+
+            draw() {
+                for (let i = 0; i < this.stars.length; i++) {
+                    this.stage.beginPath();
+                    this.stage.arc(this.stars[i].x, this.stars[i].y, (this.stars[i].size / 2), 0, 2 * Math.PI);
+                    this.stage.closePath();
+                    this.stage.fill();
+                }
+            }
+
+
+            render() {
+                this.setupDraw();
+                this.draw();
+            }
+
+
+        }
+
+
+        class Sound {
+
+            constructor() {
+
+            }
+
+
+            startAudio() {
+
+            }
+
+
+            setGain(reference, level) {
+
+            }
+
+
+            setSource(reference) {
+
+            }
+
+
+            loadAudio(reference) {
+
+            }
+
+
+            init() {
+
+            }
+
+
+            tryPlayAudio(reference, level) {
+
+            }
+
+
+            playPlayerShoot() {
+
+            }
+
+
+            playEnemyShoot() {
+
+            }
+
+
+            playEnemyExplosion() {
+
+            }
+
+
+            playPlayerCollision() {
+
+            }
+
+
+            playLevelComplete() {
+
+            }
+
+
+            playMenuAction() {
+
+            }
+
+
+            playFailed() {
+
+            }
+
+
+            playTrack(offset) {
+
+            }
+
+
+            stopTrack() {
+
+            }
+
+
+            pauseTrack() {
+
+            }
+
+
+            resumeTrack() {
+
+            }
+
+
+        }
+
+
+        class Input {
+
+            constructor(stage) {
+                //element za click listener
+                this.stage = stage;
+
+                this.left = false;
+                this.right = false;
+                this.up = false;
+                this.down = false;
+                this.spacebar = false;
+                this.escape = false;
+                this.enter = false;
+
+                this.clicked = false;
+                this.clickX = undefined;
+                this.clickY = undefined;
+                //arrow oblik korišten da se zadrži 'this' na metodama iz klase, inače bi bio window kod event listenera
+                document.addEventListener("keydown", key => this.keyDown(key), false);
+                document.addEventListener("keyup", key => this.keyUp(key), false);
+                stage.canvas.addEventListener("click", key => this.onClick(event), false);
+            }
+
+
+            keyDown(key) {
+                if (key.key == "Right" || key.key == "ArrowRight" || key.code == "KeyD") {
+                    this.right = true;
+                }
+                if (key.key == "Left" || key.key == "ArrowLeft" || key.code == "KeyA") {
+                    this.left = true;
+                }
+                if (key.key == "Up" || key.key == "ArrowUp" || key.code == "KeyW") {
+                    this.up = true;
+                }
+                if (key.key == "Down" || key.key == "ArrowDown" || key.code == "KeyS") {
+                    this.down = true;
+                }
+                if (key.code == "32" || key.code == "Space") {
+                    this.spacebar = true;
+                }
+                if (key.key == "Escape" || key.key == "Esc" || key.code == "27") {
+                    //ovaj input radi samo na key up zbog višestrukih detekcija inače
+                    //this.escape = true;
+                }
+                if (key.key == "Enter" || key.code == "13") {
+                    this.enter = true;
+                }
+            }
+
+
+            keyUp(key) {
+                if (key.key == "Right" || key.key == "ArrowRight" || key.code == "KeyD") {
+                    this.right = false;
+                }
+                if (key.key == "Left" || key.key == "ArrowLeft" || key.code == "KeyA") {
+                    this.left = false;
+                }
+                if (key.key == "Up" || key.key == "ArrowUp" || key.code == "KeyW") {
+                    this.up = false;
+                }
+                if (key.key == "Down" || key.key == "ArrowDown" || key.code == "KeyS") {
+                    this.down = false;
+                }
+                if (key.code == "32" || key.code == "Space") {
+                    this.spacebar = false;
+                }
+                if (key.key == "Escape" || key.key == "Esc" || key.code == "27") {
+                    this.escape = true;
+                }
+                if (key.key == "Enter" || key.code == "13") {
+                    this.enter = true;
+                }
+            }
+
+
+            onClick(event) {
+                this.clicked = true;
+                this.clickX = event.offsetX;
+                this.clickY = event.offsetY;
+            }
+
+
+            resetAction() {
+                this.escape = false;
+                this.enter = false;
+                this.clicked = false;
+                this.clickX = undefined;
+                this.clickY = undefined;
+            }
+
+        }
+
+
+        class Bullet {
+
+            constructor(stage, posX, posY, type) {
+                this.stage = stage;
+                this.positionX = posX;
+                this.positionY = posY;
+                //fiksna veličina objekta
+                this.radius = 3;
+                this.sizeY = this.radius * 2;
+                this.sizeX = this.radius * 2;
+
+                //variable igre
+                this.speed = 2;
+
+                if (type == 'player') {
+                    this.bulletColor1 = 'yellow';
+                    this.bulletColor2 = 'deepskyblue';
+                    this.bulletYoffset = 2;
+                } else if (type == 'enemy') {
+                    this.bulletColor1 = 'yellow';
+                    this.bulletColor2 = 'tomato';
+                    this.bulletYoffset = -2;
+                }
+            }
+
+
+            moveUp() {
+                this.positionY -= this.speed;
+            }
+
+
+            moveDown() {
+                this.positionY += this.speed;
+            }
+
+
+            isOutside() {
+                if (this.positionY < 0 || this.positionY > this.stage.canvas.height) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+            setupDraw() {
+                this.stage.lineWidth = 1;
+                this.stage.lineCap = "butt";
+                this.stage.lineJoin = "miter";
+            }
+
+
+            draw() {
+                this.stage.beginPath();
+                this.stage.arc(this.positionX, this.positionY, this.radius, 0, 2 * Math.PI);
+                this.stage.closePath();
+            }
+
+
+            finishDraw() {
+                var gradient = this.stage.createRadialGradient(this.positionX, this.positionY + this.bulletYoffset, 0.1, this.positionX, this.positionY, 3);
+                gradient.addColorStop(0, this.bulletColor1);
+                gradient.addColorStop(1, this.bulletColor2);
+                this.stage.fillStyle = gradient;
+                //this.stage.fillStyle = this.color;
+                this.stage.fill();
+            }
+
+
+            render() {
+                this.setupDraw();
+                this.draw();
+                this.finishDraw();
+            }
+
+        }
+
+
+        //ovo je zajednička klasa sa Enemy i Player
+        class Entity {
+
+            constructor() {
+            }
+
+
+            random(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+
+            setBoundingBox() {
+                this.leftEdge = this.positionX - (this.sizeX / 2);
+                this.rightEdge = this.positionX + (this.sizeX / 2);
+                this.upEdge = this.positionY - (this.sizeY / 2);
+                this.downEdge = this.positionY + (this.sizeY / 2);
+            }
+
+
+            moveBoxX(change) {
+                this.leftEdge += change;
+                this.rightEdge += change;
+            }
+
+
+            moveBoxY(change) {
+                this.upEdge += change;
+                this.downEdge += change;
+            }
+
+
+            accelerateNumber(sign, number, ratio) {
+                if (sign > 0) {
+                    //ako postotak ne odgovara smjeru, promjeni predznak
+                    if (number < 0) {
+                        number = Math.abs(number);
+                    }
+                    number = number + this.acceleration * ratio;
+                    //prisili broj na limit
+                    number = Math.min(number, this.maxSpeedPercentage);
+                } else if (sign < 0) {
+                    //ako postotak ne odgovara smjeru, promjeni predznak
+                    if (number > 0) {
+                        number = -Math.abs(number);
+                    }
+                    number = number - this.acceleration * ratio;
+                    //prisili broj na limit
+                    number = Math.max(number, -this.maxSpeedPercentage);
+                }
+
+                return number;
+            }
+
+
+            accelerate(changeX, changeY, isDiagonal) {
+                if (!isDiagonal) {
+                    if (changeX < 0) {
+                        this.speedPercentageX = this.accelerateNumber(-1, this.speedPercentageX, 1);
+                    } else if (changeX > 0) {
+                        this.speedPercentageX = this.accelerateNumber(1, this.speedPercentageX, 1);
+                    }
+
+                    if (changeY < 0) {
+                        this.speedPercentageY = this.accelerateNumber(-1, this.speedPercentageY, 1);
+                    } else if (changeY > 0) {
+                        this.speedPercentageY = this.accelerateNumber(1, this.speedPercentageY, 1);
+                    }
+                } else {
+                    if (changeX < 0) {
+                        this.speedPercentageX = this.accelerateNumber(-1, this.speedPercentageX, 0.71);
+                    } else if (changeX > 0) {
+                        this.speedPercentageX = this.accelerateNumber(1, this.speedPercentageX, 0.71);
+                    }
+
+                    if (changeY < 0) {
+                        this.speedPercentageY = this.accelerateNumber(-1, this.speedPercentageY, 0.71);
+                    } else if (changeY > 0) {
+                        this.speedPercentageY = this.accelerateNumber(1, this.speedPercentageY, 0.71);
+                    }
+                }
+
+            }
+
+
+            decelerate() {
+                if (this.speedPercentageX > this.minSpeedPercentage) {
+                    this.speedPercentageX -= this.acceleration;
+                    Math.max(this.speedPercentage, this.minSpeedPercentage);
+                }
+                if (this.speedPercentageY > this.minSpeedPercentage) {
+                    this.speedPercentageY -= this.acceleration;
+                    Math.max(this.speedPercentage, this.minSpeedPercentage);
+                }
+                if (this.speedPercentageX < -this.minSpeedPercentage) {
+                    this.speedPercentageX += this.acceleration;
+                    Math.min(this.speedPercentage, -this.minSpeedPercentage);
+                }
+                if (this.speedPercentageY < -this.minSpeedPercentage) {
+                    this.speedPercentageY += this.acceleration;
+                    Math.min(this.speedPercentage, -this.minSpeedPercentage);
+                }
+            }
+
+
+            handleInertion() {
+                //vrši deceleraciju ako moje bilo pokreta
+                if (!this.moved) {
+                    this.decelerate();
+                }
+            }
+
+
+            moveLeft() {
+                let change = this.speed * -Math.abs(this.speedPercentageX);
+                this.moveBoxX(change);
+
+                //ova provjera se vrši samo za neprijatelje, kolizija sa drugim nerprijateljima
+                let enemyCheck = false;
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+
+                //ako je nova pozicija u koliziji, vrati korak
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionX += change;
+                    this.drawX += change;
+                    this.accelerate(change, 0, false);
+                    this.moved = true;
+                } else {
+                    this.moveBoxX(-change);
+                    this.moved = false;
+                }
+            }
+
+
+            moveRight() {
+                let change = this.speed * Math.abs(this.speedPercentageX);
+                this.moveBoxX(change);
+
+                //ova provjera se vrši samo za neprijatelje, kolizija sa drugim nerprijateljima
+                let enemyCheck = false;
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+
+                //ako je nova pozicija u koliziji, vrati korak
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionX += change;
+                    this.drawX += change;
+                    this.accelerate(change, 0, false);
+                    this.moved = true;
+                } else {
+                    this.moveBoxX(-change);
+                    this.moved = false;
+                }
+            }
+
+
+            moveUp() {
+                let change = this.speed * -Math.abs(this.speedPercentageY);
+                this.moveBoxY(change);
+
+                //ova provjera se vrši samo za neprijatelje, kolizija sa drugim nerprijateljima
+                let enemyCheck = false;
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+
+                //ako je nova pozicija u koliziji, vrati korak
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionY += change;
+                    this.drawY += change;
+                    this.accelerate(0, change, false);
+                    this.moved = true;
+                } else {
+                    this.moveBoxY(change);
+                    this.moved = false;
+                }
+            }
+
+
+            moveDown() {
+                let change = this.speed * Math.abs(this.speedPercentageY);
+                this.moveBoxY(change);
+
+                //ova provjera se vrši samo za neprijatelje, kolizija sa drugim nerprijateljima
+                let enemyCheck = false;
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+
+                //ako bounding box nije u koliziji, izvrši korak
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionY += change;
+                    this.drawY += change;
+                    this.accelerate(0, change, false);
+                    this.moved = true;
+                } else {
+                    this.moveBoxY(-change);
+                    this.moved = false;
+                }
+            }
+
+
+            diagonalHelper(changeX, changeY) {
+                let moved = false;
+
+                //ova provjera se vrši samo za neprijatelje, kolizija sa drugim nerprijateljima
+                let enemyCheck = false;
+
+                this.moveBoxX(changeX);
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+                //ako je nova pozicija u koliziji, vrati korak
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionX += changeX;
+                    this.drawX += changeX;
+                    this.accelerate(changeX, 0, true);
+                    moved = true;
+                } else {
+                    this.moveBoxX(-changeX);
+                }
+
+                this.moveBoxY(changeY);
+                enemyCheck = false;
+                if (this.collisionEnemies) {
+                    enemyCheck = this.collisionEnemies();
+                }
+                if (!this.collisionStage() && !enemyCheck) {
+                    this.positionY += changeY;
+                    this.drawY += changeY;
+                    this.accelerate(0, changeY, true);
+                    moved = true;
+                } else {
+                    this.moveBoxY(-changeY);
+                }
+
+                this.moved = moved;
+            }
+
+
+            moveLeftUp() {
+                let changeX = (this.speed * -Math.abs(this.speedPercentageX)) / 1.41;
+                let changeY = (this.speed * -Math.abs(this.speedPercentageY)) / 1.41;
+
+                this.diagonalHelper(changeX, changeY);
+            }
+
+
+            moveLeftDown() {
+                let changeX = (this.speed * -Math.abs(this.speedPercentageX)) / 1.41;
+                let changeY = (this.speed * Math.abs(this.speedPercentageY)) / 1.41;
+
+                this.diagonalHelper(changeX, changeY);
+
+            }
+
+
+            moveRightUp() {
+                let changeX = (this.speed * Math.abs(this.speedPercentageX)) / 1.41;
+                let changeY = (this.speed * -Math.abs(this.speedPercentageY)) / 1.41;
+
+                this.diagonalHelper(changeX, changeY);
+
+            }
+
+            moveRightDown() {
+                let changeX = (this.speed * Math.abs(this.speedPercentageX)) / 1.41;
+                let changeY = (this.speed * Math.abs(this.speedPercentageY)) / 1.41;
+
+                this.diagonalHelper(changeX, changeY);
+
+            }
+
+
+            shoot() {
+                //ako nije nedavno pucano
+                if (!this.wait) {
+                    //kreira metak koji će biti ispucan
+                    const bullet = new Bullet(this.stage, this.positionX, this.positionY + this.gunYOffset, this.bulletType);
+
+                    //pričeka ako je nedavno pucano
+                    this.wait = true;
+                    this.shootingTimer = this.shootingSpeed;
+
+                    return bullet;
+                } else {
+                    return false;
+                }
+            }
+
+
+            collisionStage() {
+                if (
+                    this.leftEdge <= 0 ||
+                    this.rightEdge >= this.stage.canvas.width ||
+                    this.upEdge <= 0 ||
+                    this.downEdge >= this.stage.canvas.height
+                ) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+            collisionBullet(bullet) {
+                //provjerava samo centar metka, ne izračunava bounding box
+                if (
+                    (this.leftEdge <= bullet.positionX && this.rightEdge >= bullet.positionX) &&
+                    (this.upEdge <= bullet.positionY && this.downEdge >= bullet.positionY)
+                ) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+            collisionEntity(entity) {
+                if (this.upEdge < entity.downEdge &&
+                    this.rightEdge > entity.leftEdge &&
+                    this.leftEdge < entity.rightEdge &&
+                    this.downEdge > entity.upEdge) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+            doCycle() {
+                //mijenja brzinu ako se pomaknuo zadnji ciklus
+                this.handleInertion();
+
+                //resetira moved flag
+                this.moved = false;
+
+                //ponovno namješta bounding box za idući frame
+                this.setBoundingBox();
+
+                //oduzima 1 ciklus sa timera kad čeka
+                this.handleTimings();
+            }
+
+
+        }
+
+
+        class Player extends Entity {
+
+            constructor(stage, posX, posY) {
+                super();
+
+                this.stage = stage;
+                this.positionX = posX;
+                this.positionY = posY;
+
+                //fiksna veličina objekta
+                this.sizeY = 30;
+                this.sizeX = 30;
+
+                //lokacija na objektu iz koje se puca
+                this.gunYOffset = -10;
+
+                //brzina igrača
+                this.speed = 2;
+                this.minSpeedPercentage = 0.1;
+                this.maxSpeedPercentage = 1;
+                this.speedPercentageX = this.minSpeedPercentage;
+                this.speedPercentageY = this.minSpeedPercentage;
+                this.acceleration = 0.1;
+
+                //gameplay variable
+                this.moved = false;
+
+                //veća vrijednost za sporije pucanje
+                this.shootingSpeed = 30;
+                this.shootingTimer = 0;
+                this.bulletType = 'player';
+                this.wait = false;
+
+                //pomiče liniju crtanja po fiksnom offsetu
+                this.drawX = this.positionX - (this.sizeX / 2);
+                this.drawY = this.positionY - (this.sizeY / 2);
+
+                //bounding box za koliziju
+                this.setBoundingBox();
+            }
+
+
+            setupDraw() {
+                this.stage.lineWidth = 1;
+                this.stage.lineCap = "butt";
+                this.stage.lineJoin = "miter";
+            }
+
+
+            draw() {
+                this.stage.beginPath();
+                this.stage.moveTo(0 + this.drawX, 30 + this.drawY);
+                this.stage.lineTo(5 + this.drawX, 20 + this.drawY);
+                this.stage.lineTo(5 + this.drawX, 0 + this.drawY);
+                this.stage.lineTo(10 + this.drawX, 10 + this.drawY);
+                this.stage.lineTo(15 + this.drawX, 0 + this.drawY);
+                this.stage.lineTo(20 + this.drawX, 10 + this.drawY);
+                this.stage.lineTo(25 + this.drawX, 0 + this.drawY);
+                this.stage.lineTo(25 + this.drawX, 20 + this.drawY);
+                this.stage.lineTo(30 + this.drawX, 30 + this.drawY);
+                this.stage.closePath();
+            }
+
+
+            finishDraw() {
+                var gradient = this.stage.createRadialGradient(this.positionX, this.positionY + 5, 11, this.positionX, this.positionY + 5, 15);
+                gradient.addColorStop(0, "blue");
+                gradient.addColorStop(1, "DeepSkyBlue");
+                this.stage.fillStyle = gradient;
+                this.stage.fill();
+            }
+
+
+            render() {
+                this.setupDraw();
+                this.draw();
+                this.finishDraw();
+            }
+
+
+            handleTimings() {
+                //oduzima 1 ciklus sa timera kad čeka
+                if (this.wait && this.shootingTimer >= 0) {
+                    this.shootingTimer--;
+                } else {
+                    this.wait = false;
+                }
+            }
+
+        }
+
+
+        class Enemy extends Entity {
+
+            constructor(stage, posX, posY, otherEnemies) {
+                super();
+
+                this.stage = stage;
+                this.positionX = posX;
+                this.positionY = posY;
+
+                //fiksna veličina objekta
+                this.sizeY = 30;
+                this.sizeX = 30;
+
+                //postavljanje koordinata za render
+                this.drawX = this.positionX - (this.sizeX / 2);
+                this.drawY = this.positionY - (this.sizeY / 2);
+
+                //lokacija na objektu iz koje se puca
+                this.gunYOffset = 10;
+
+                //variable za gameplay
+                this.speed = 1.3;
+                this.minSpeedPercentage = 0.1;
+                this.maxSpeedPercentage = 1;
+                this.speedPercentageX = this.minSpeedPercentage;
+                this.speedPercentageY = this.minSpeedPercentage;
+                this.acceleration = this.speed / 100;
+                this.moved = false;
+                this.moveDirection = 0;
+                this.moveDuration = 30;
+                this.moveDurationMin = 10;
+                this.moveDurationMax = 35;
+                this.moveTimer = this.moveDuration;
+                this.moveWait = true;
+                this.points = 10;
+
+                //veća vrijednost za sporije pucanje
+                this.shootingSpeed = 200;
+                this.shootingTimerMin = 150;
+                this.shootingTimerMax = 250;
+                this.shootingCurrentPeriod = this.shootingSpeed;
+                this.shootingTimer = 200;
+                this.bulletType = 'enemy';
+                this.wait = true;
+
+                //bounding box za koliziju
+                this.setBoundingBox();
+
+                //vjerojatnosti smjera za korištenje
+                this.leftDirections = [1, 5, 6];
+                this.rightDirections = [2, 7, 8];
+                this.upDirections = [3, 5, 7];
+                this.downDirections = [4, 6, 8];
+
+                //lista vjerojatnosti
+                this.probabilityList = new Array();
+
+                //lista eliminiranih pokreta
+                this.noMoveList = new Array();
+
+                //referenca na druge neprijatelje u igri za koliziju, ponovno se postavlje u igri kad se promijeni
+                this.otherEnemies = undefined;
+
+            }
+
+
+            moveInDirection(direction) {
+                switch (direction) {
+                    case 1:
+                        this.moveLeft();
+                        break;
+
+                    case 2:
+                        this.moveRight();
+                        break;
+
+                    case 3:
+                        this.moveUp();
+                        break;
+
+                    case 4:
+                        this.moveDown();
+                        break;
+
+                    case 5:
+                        this.moveLeftUp();
+                        break;
+
+                    case 6:
+                        this.moveLeftDown();
+                        break;
+
+                    case 7:
+                        this.moveRightUp();
+                        break;
+
+                    case 8:
+                        this.moveRightDown();
+                        break;
+
+                    case 9:
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            randomDirection(list) {
+                return list[this.random(1, list.length)];
+            }
+
+
+            addDirections(list, directionList) {
+                for (let i = 0; i < directionList.length; i++) {
+                    list.push(directionList[i]);
+                }
+            }
+
+
+            avoidPlayerBullets(playerBullets) {
+                for (let i = 0; i < playerBullets.length; i++) {
+                    //ako je ispod neprijatelja i blizu po vertikali
+                    if (playerBullets[i].positionY > this.positionY && (playerBullets[i].positionY - this.positionY) < 200) {
+                        //ako je blizu po horizontali
+                        if (playerBullets[i].positionX > this.positionX && playerBullets[i].positionX - this.positionX < 25) {
+                            this.addDirections(this.probabilityList, this.leftDirections);
+                            this.addDirections(this.probabilityList, this.leftDirections);
+                            this.addDirections(this.probabilityList, this.leftDirections);
+                        }
+                        if (playerBullets[i].positionX < this.positionX && this.positionX - playerBullets[i].positionX < 25) {
+                            this.addDirections(this.probabilityList, this.rightDirections);
+                            this.addDirections(this.probabilityList, this.rightDirections);
+                            this.addDirections(this.probabilityList, this.rightDirections);
+                        }
+                    }
+                }
+            }
+
+
+            collisionEnemies() {
+                //potvrdi ako nađe koliziju sa neprijateljem iz lokalne liste
+                for (let i = 0; i < this.otherEnemies.length; i++) {
+                    if (this.collisionEntity(this.otherEnemies[i])) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+            decideMovement(playerX, playerY) {
+
+                //lista mogućih pokreta
+                let allList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+                //lista koja će biti popunjena prživjelim smjerovima
+                let goodList = new Array();
+
+                //dodaj jednom stari smjer
+                this.addDirections(this.probabilityList, [this.moveDirection]);
+
+                //eliminiraj smjerove koji vode ispod igrača(ne može pucati efektivno)
+                if (playerY < this.positionY) {
+                    this.addDirections(this.noMoveList, this.downDirections);
+                    this.addDirections(this.probabilityList, this.upDirections);
+                }
+
+                //ako uskoro može pucati(ostalo manje od pola vremena) kreni prema igraču
+                if (this.shootingTimer < (this.shootingCurrentPeriod / 2)) {
+                    if (this.positionX < playerX) {
+                        this.addDirections(this.noMoveList, this.leftDirections);
+                        this.addDirections(this.probabilityList, this.rightDirections);
+                    } else if (this.positionX > playerX) {
+                        this.addDirections(this.noMoveList, this.rightDirections);
+                        this.addDirections(this.probabilityList, this.leftDirections);
+                    }
+                }
+
+                //ako je blizu igraču povećaj vjerojatnost udaljavanja
+                if (playerX - this.positionX < 250 && playerX - this.positionX > 0) {
+                    this.addDirections(this.probabilityList, this.leftDirections);
+                    this.addDirections(this.probabilityList, this.leftDirections);
+                }
+                if (this.positionX - playerX < 250 && this.positionX - playerX > 0) {
+                    this.addDirections(this.probabilityList, this.rightDirections);
+                    this.addDirections(this.probabilityList, this.rightDirections);
+                }
+                if (playerY - this.positionY < 100 && playerY - this.positionY > 0) {
+                    this.addDirections(this.probabilityList, this.upDirections);
+                }
+                if (this.positionY - playerY < 100 && this.positionY - playerY > 0) {
+                    this.addDirections(this.probabilityList, this.downDirections);
+                }
+
+                //povećaj vjerojatnosti da se odmakne od rubova
+                if (this.positionX < 2 * this.sizeX) {
+                    this.addDirections(this.probabilityList, this.rightDirections);
+                }
+                if (this.positionX > (this.stage.canvas.width - 2 * this.sizeX)) {
+                    this.addDirections(this.probabilityList, this.leftDirections);
+                }
+                if (this.positionY < 2 * this.sizeY) {
+                    this.addDirections(this.probabilityList, this.downDirections);
+                }
+                if (this.positionY > (this.stage.canvas.heigth - 2 * this.sizeY)) {
+                    this.addDirections(this.probabilityList, this.upDirections);
+                }
+
+                //dodaj bar jednu listu smjerova
+                for (let i = 0; i < allList.length; i++) {
+                    goodList.push(allList[i]);
+                }
+
+                //pojačaj vjerojatnosti
+                for (let i = 0; i < this.probabilityList.length; i++) {
+                    goodList.push(this.probabilityList[i]);
+                }
+
+                //makni nomove smjerove(zamijeni ih sa no move)
+                for (let i = 0; i < goodList.length; i++) {
+                    if (this.noMoveList.includes(goodList[i])) {
+                        goodList[i] = 9;
+                    }
+                }
+
+                //odabire nasumično iz dobrih smjerova
+                this.moveDirection = this.randomDirection(goodList);
+
+                //novi smjer randomiziran i kreće čekanje do nove promjene smjera
+                this.moveWait = true;
+            }
+
+
+            doMovement(playerX, playerY) {
+                if (!this.moveWait) {
+                    this.decideMovement(playerX, playerY);
+                    this.moveWait = true;
+                }
+
+                //this.moveInDirection(this.moveDirection);
+                this.moveInDirection(this.moveDirection);
+
+                //resetira liste
+                this.probabilityList = new Array();
+                this.noMoveList = new Array();
+            }
+
+
+            do(playerX, playerY) {
+                this.doMovement(playerX, playerY);
+
+                let action = false;
+
+                action = this.shoot();
+
+                return action;
+            }
+
+
+            handleTimings() {
+                //timer za pucanje
+                if (this.wait && this.shootingTimer >= 0) {
+                    this.shootingTimer--;
+                } else {
+                    //randomizira shootingTimer za iduće pucanje
+                    this.shootingSpeed = this.random(this.shootingTimerMin, this.shootingTimerMax);
+                    //sprema vrijednost u currentPeriod za odluke kasnije
+                    this.shootingCurrentPeriod = this.shootingSpeed;
+                    this.wait = false;
+                }
+
+                //timer za kretanje
+                if (this.moveWait && this.moveTimer >= 0) {
+                    this.moveTimer--;
+                } else {
+                    //randomizira moveDurationn za idući pokret
+                    this.moveDuration = this.random(this.moveDurationMin, this.moveDurationMax);
+                    this.moveTimer = this.moveDuration;
+                    this.moveWait = false;
+                }
+            }
+
+
+            setupDraw() {
+                this.stage.strokeStyle = "rgba(255,255,255,1)";
+                this.stage.lineWidth = 1;
+                this.stage.lineCap = "butt";
+                this.stage.lineJoin = "miter";
+            }
+
+
+            draw() {
+                this.stage.beginPath();
+                this.stage.moveTo(0 + this.drawX, 0 + this.drawY);
+                this.stage.lineTo(30 + this.drawX, 0 + this.drawY);
+                this.stage.lineTo(25 + this.drawX, 10 + this.drawY);
+                this.stage.lineTo(25 + this.drawX, 30 + this.drawY);
+                this.stage.lineTo(20 + this.drawX, 20 + this.drawY);
+                this.stage.lineTo(20 + this.drawX, 20 + this.drawY);
+                this.stage.lineTo(15 + this.drawX, 30 + this.drawY);
+                this.stage.lineTo(10 + this.drawX, 20 + this.drawY);
+                this.stage.lineTo(5 + this.drawX, 30 + this.drawY);
+                this.stage.lineTo(5 + this.drawX, 10 + this.drawY);
+                this.stage.closePath();
+            }
+
+
+            finishDraw() {
+                var gradient = this.stage.createRadialGradient(this.positionX, this.positionY - 5, 11, this.positionX, this.positionY - 5, 15);
+                gradient.addColorStop(0, "crimson");
+                gradient.addColorStop(1, "red");
+                this.stage.fillStyle = gradient;
+                this.stage.fill();
+            }
+
+
+            render() {
+                this.setupDraw();
+                this.draw();
+                this.finishDraw();
+            }
+
+        }
+
+
+        class Game {
+
+            constructor(stageElement) {
+                this.stage = stageElement.getContext("2d");
+
+                //glavni flagovi
+                this.running = false;
+                this.paused = false;
+                this.started = false;
+                this.recovery = false;
+                this.recoveryTime = 200;
+                this.recoveryCurrentTime = this.recoveryTime;
+                this.dead = false;
+                this.levelEnd = false;
+
+                //fiksna veličina
+                this.defaultX = 600;
+                this.defaultY = 600;
+
+                //početno skaliranje
+                stageElement.width = this.defaultX;
+                stageElement.height = this.defaultY;
+
+                //centar za daljnje korištenje
+                this.stageCenterX = this.stage.canvas.width / 2;
+                this.stageCenterY = this.stage.canvas.height / 2;
+
+                //instanciranje handlera inputa
+                this.input = new Input(this.stage);
+
+                //kreiranje igrača
+                this.player = new Player(this.stage, 300, 550);
+
+                //postavljanje variabli igre
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.maxEnemyNumber = 60;
+
+                //kreiranje neprijatelja po nacrtu
+                this.enemies = new Array();
+                this.createEnemies();
+
+                //variable huda i menua
+                this.scoreBoardX = 10;
+                this.lifeBoardX = this.stage.canvas.width - 122;
+                this.menuWidth = 300;
+                this.menuHeight = 350;
+                this.menuX = this.stageCenterX - (this.menuWidth / 2);
+                this.menuY = this.stageCenterY - (this.menuHeight / 2);
+
+                //instanciranje klasa pozadine i zvuka
+                this.background = new Background(this.stage);
+                this.sound = new Sound();
+
+                //liste metaka
+                this.enemyBullets = new Array();
+                this.playerBullets = new Array();
+            }
+
+
+            clearStage() {
+                this.stage.fillStyle = 'rgba(0,0,0,1)';
+                this.stage.fillRect(0, 0, this.stage.canvas.width, this.stage.canvas.height);
+            }
+
+
+            createEnemyFormation(number) {
+                let rowNumbers = Array();
+
+                const maxRowSize = 12;
+
+                let currentRow = 1;
+                let currentRowSize = 1;
+                let currentNumber = Math.min(number, this.maxEnemyNumber);
+
+                while (currentNumber > 0) {
+                    if (currentRowSize >= maxRowSize) {
+                        rowNumbers.push(currentRowSize);
+                        currentRow++;
+                        currentRowSize = 1;
+                    } else {
+                        if (currentNumber == 1) {
+                            rowNumbers.push(currentRowSize);
+                        }
+                        currentRowSize++;
+                    }
+                    currentNumber--;
+                }
+
+                return rowNumbers;
+
+            }
+
+
+            createEnemies() {
+                //poredak neprijatelja definiran ovdje
+                const spacing = 10;
+                const enemyHalf = 15;
+
+                const formation = this.createEnemyFormation(this.level);
+
+                let enemyPositions = Array();
+
+                //kreira neprijatelje po formaciji
+                for (let i = 0; i < formation.length; i++) {
+                    const y = (spacing * (i + 1)) + enemyHalf + (enemyHalf * 2 * i);
+                    const rowWidth = formation[i] * enemyHalf * 2 + (spacing * (formation[i] - 1));
+                    let x = (this.stage.canvas.width - rowWidth) / 2 + enemyHalf;
+                    for (let j = 1; j <= formation[i]; j++) {
+                        this.enemies.push(new Enemy(this.stage, x, y, this.enemies));
+                        x += enemyHalf * 2 + spacing;
+                    }
+                }
+            }
+
+
+            enemyDo() {
+                let action = false;
+                for (let i = 0; i < this.enemies.length; i++) {
+                    //šalje poziciju igrača neprijatelju i doviva nešto za uzvrat kao akciju
+                    action = this.enemies[i].do(this.player.positionX, this.player.positionY);
+                    if (action instanceof Bullet) {
+                        this.enemyBullets.push(action);
+                        this.sound.playEnemyShoot();
+                    }
+                }
+            }
+
+
+            playerHit() {
+                //vodi brigu o broju života igrača ovdje
+                if (this.lives > 0) {
+                    this.lives--;
+                    this.recovery = true;
+                } else {
+                    //zaustavlja igru ako nema više života
+                    this.running = false;
+                    this.dead = true;
+                    this.sound.stopTrack();
+                    this.sound.playFailed();
+                }
+            }
+
+
+            checkRectClick(minX, minY, width, height) {
+                let scale = this.stage.canvas.width / this.stage.canvas.offsetWidth;
+
+                if ((this.input.clickX * scale) >= minX &&
+                    (this.input.clickX * scale) <= (minX + width) &&
+                    (this.input.clickY * scale) >= minY &&
+                    (this.input.clickY * scale) <= (minY + height)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+            handleInput() {
+
+                //kretanje igrača
+                let horizontal = (this.input.left || this.input.right) && (this.input.left !== this.input.right);
+                let vertical = (this.input.up || this.input.down) && (this.input.up !== this.input.down);
+                let diagonal = horizontal && vertical;
+                if (diagonal && this.input.left) {
+                    if (this.input.up) {
+                        this.player.moveLeftUp();
+                    } else {
+                        this.player.moveLeftDown();
+                    }
+                } else if (diagonal && this.input.right) {
+                    if (this.input.up) {
+                        this.player.moveRightUp();
+                    } else {
+                        this.player.moveRightDown();
+                    }
+                } else if (horizontal) {
+                    if (this.input.left) {
+                        this.player.moveLeft();
+                    } else {
+                        this.player.moveRight();
+                    }
+                } else if (vertical) {
+                    if (this.input.up) {
+                        this.player.moveUp();
+                    } else {
+                        this.player.moveDown();
+                    }
+                }
+
+                //pucanje(player stvori i vrati metak)
+                if (this.input.spacebar) {
+                    let bullet = this.player.shoot();
+                    if (bullet != false) {
+                        this.playerBullets.push(bullet);
+                        this.sound.playPlayerShoot();
+                    }
+                }
+
+                //zaustavlja igru i otvara menu
+                if (this.input.escape) {
+                    if (this.paused) {
+                        this.running = true;
+                        this.paused = false;
+                        this.input.resetAction();
+                        this.sound.playMenuAction();
+                        this.sound.resumeTrack();
+                    } else if (this.running) {
+                        this.running = false;
+                        this.paused = true;
+                        this.input.resetAction();
+                        this.sound.playMenuAction();
+                        this.sound.pauseTrack();
+                    }
+                }
+
+                //provjerava click na menuu(vrijednosti pozicija su hardcoded)
+                if (this.input.clicked) {
+                    //opcija 1
+                    if (this.checkRectClick(this.menuX + 25, this.menuY + 75, this.menuWidth - 50, 50)) {
+                        if (this.paused) {
+                            //samo prebaci flag
+                            this.running = true;
+                            this.paused = false;
+                            this.sound.playMenuAction();
+                        } else if (!this.started) {
+                            //pokreni audio api, moraš to ovdje na prvi input
+                            this.sound.startAudio();
+                            this.sound.playTrack(0);
+                            //ako još igra nije pokrenuta, ovo je samo na početku
+                            this.startGame();
+                        } else if (this.dead) {
+                            this.sound.playMenuAction();
+                            this.restartGame();
+                        } else if (this.levelEnd) {
+                            this.sound.playMenuAction();
+                            this.nextLevel();
+                        }
+                    }
+
+                    //opcija 2
+                    if (this.checkRectClick(this.menuX + 25, this.menuY + 260, this.menuWidth - 50, 50) && !this.running) {
+                        //povratak na stranicu sa projektima
+                        window.location.href = "http://www.tomislavpetrovic.github.io/";
+                        this.sound.playMenuAction();
+                    }
+
+                    this.input.resetAction();
+                }
+
+                //enter tipka u menuu
+                if (this.input.enter) {
+                    if (this.paused) {
+                        this.running = true;
+                        this.paused = false;
+                        this.sound.playMenuAction();
+                    } else if (!this.started) {
+                        //ovo je druga točka gdje počinje igra
+                        this.sound.startAudio();
+                        this.sound.playTrack(0);
+                        this.startGame();
+                    } else if (this.dead) {
+                        this.restartGame();
+                    } else if (this.levelEnd) {
+                        this.nextLevel();
+                    }
+
+                    this.input.resetAction();
+                }
+
+            }
+
+
+            checkPlayerBullets() {
+                //postavnljanje pogođenih na undefined
+                for (let i = 0; i < this.playerBullets.length; i++) {
+                    //briše metak odmah ako je izašao van prostora
+                    if (this.playerBullets[i].isOutside()) {
+                        this.playerBullets[i] = undefined;
+                        continue;
+                    }
+                    for (let j = 0; j < this.enemies.length; j++) {
+                        //ako je pogodak, briše upise sa sadašnjih lista
+                        if (this.enemies[j]) {
+                            if (this.enemies[j].collisionBullet(this.playerBullets[i])) {
+                                //dodaje bodove za pogođenog neprijatelja
+                                this.score += this.enemies[j].points;
+
+                                //briše pogođene aktere
+                                this.enemies[j] = undefined;
+                                this.playerBullets[i] = undefined;
+
+                                //pušta zvuk eksplozije neprijatelja
+                                this.sound.playEnemyExplosion();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                //čišćenje uništenih objekata
+                this.enemies = this.enemies.filter(enemy => enemy !== undefined);
+                this.playerBullets = this.playerBullets.filter(bullet => bullet !== undefined);
+
+                //šalje novu listu neprijatelja neprijateljima za izbjegavanje
+                for (let i = 0; i < this.enemies.length; i++) {
+                    this.enemies[i].otherEnemies = this.enemies.filter(enemy => enemy !== this.enemies[i]);
+                }
+
+                //šalje listu neprijateljima za izbjegavanje
+                for (let i = 0; i < this.enemies.length; i++) {
+                    this.enemies[i].avoidPlayerBullets(this.playerBullets);
+                }
+
+            }
+
+
+            checkEnemyBullets() {
+                for (let i = 0; i < this.enemyBullets.length; i++) {
+                    //briše metak odmah ako je izašao van prostora
+                    if (this.enemyBullets[i].isOutside()) {
+                        this.enemyBullets[i] = undefined;
+                        continue;
+                    }
+                    if (this.player.collisionBullet(this.enemyBullets[i])) {
+                        this.playerHit();
+                        this.enemyBullets[i] = undefined;
+                    }
+                }
+
+                //čišćenje uništenih objekata
+                this.enemyBullets = this.enemyBullets.filter(bullet => bullet !== undefined);
+            }
+
+
+            checkEnemyBodies() {
+                if (!this.recovery) {
+                    for (let i = 0; i < this.enemies.length; i++) {
+                        if (this.player.collisionEntity(this.enemies[i])) {
+                            this.playerHit();
+                            this.sound.playPlayerCollision();
+                        }
+                    }
+                }
+            }
+
+
+            checkBullets() {
+                this.checkPlayerBullets();
+                if (!this.recovery) {
+                    this.checkEnemyBullets();
+                }
+            }
+
+
+            timerRecovery() {
+                if (this.recoveryCurrentTime <= 0) {
+                    this.recovery = false;
+                    this.recoveryCurrentTime = this.recoveryTime;
+                } else if (this.recovery) {
+                    this.recoveryCurrentTime--;
+                }
+            }
+
+
+            checkEnemiesDead() {
+                //ako su svi neprijatelji mrtvi, okreni stanje na menu na kraju nivoa
+                if (this.enemies.length == 0) {
+                    this.running = false;
+                    this.levelEnd = true;
+                    //puštaj zvuk za uspješan kraj nivoa
+                    this.sound.stopTrack();
+                    this.sound.playLevelComplete();
+                }
+            }
+
+
+            renderEnemies() {
+                for (let i = 0; i < this.enemies.length; i++) {
+                    //ako neprijatelj nije već "uništen"
+                    if (this.enemies[i]) {
+                        this.enemies[i].render();
+                    }
+                }
+            }
+
+
+            renderPlayer() {
+                //ne crta igrača svaki frame ako je u recovery
+                if (!(this.recovery && (this.recoveryCurrentTime % 5) == 0)) {
+                    this.player.render();
+                }
+            }
+
+
+            //i pomiče metke
+            renderEnemyBullets() {
+                for (let i = 0; i < this.enemyBullets.length; i++) {
+                    this.enemyBullets[i].moveDown();
+                    this.enemyBullets[i].render();
+                }
+            }
+
+
+            //i pomiče metke
+            renderPlayerBullets() {
+                for (let i = 0; i < this.playerBullets.length; i++) {
+                    this.playerBullets[i].moveUp();
+                    this.playerBullets[i].render();
+                }
+            }
+
+
+            cycleEntities() {
+                this.player.doCycle();
+
+                for (let i = 0; i < this.enemies.length; i++) {
+                    //ako neprijatelj nije već "uništen"
+                    if (this.enemies[i]) {
+                        this.enemies[i].doCycle();
+                    }
+                }
+            }
+
+
+            renderHud() {
+                this.stage.lineWidth = 1;
+                this.stage.lineCap = "butt";
+                this.stage.lineJoin = "miter";
+
+                this.stage.beginPath();
+                this.stage.rect(this.scoreBoardX, 10, 110, 20);
+                this.stage.rect(this.lifeBoardX, 10, 110, 20);
+                this.stage.rect(this.stageCenterX - 55, 10, 110, 20);
+                this.stage.closePath();
+                this.stage.stroke();
+                this.stage.globalAlpha = 0.7;
+                this.stage.fillStyle = "rgba(200,200,255,1)";
+                this.stage.fill();
+                this.stage.globalAlpha = 1;
+
+                //dodaje nule ispred rezultata
+                let score = this.score.toString().padStart(5, '0');
+
+                this.stage.textAlign = "center";
+                this.stage.font = "bold 16px Arial";
+                this.stage.fillStyle = "rgba(0,0,0,1)";
+                this.stage.fillText(('Score: ' + score), 65, 26);
+                this.stage.fillText(('Lives: ' + this.lives), this.lifeBoardX + 55, 26);
+                this.stage.fillText(('Level ' + this.level), this.stageCenterX, 26);
+            }
+
+            getRandom(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            renderBackground() {
+                this.background.moveStars();
+                this.background.render();
+            }
+
+
+            showMenu() {
+                this.stage.textAlign = "center";
+
+                //vanjski element
+                this.stage.beginPath();
+                this.stage.rect(this.menuX, this.menuY, this.menuWidth, this.menuHeight);
+                this.stage.strokeStyle = "black";
+                this.stage.lineWidth = 3;
+                this.stage.closePath();
+                this.stage.stroke();
+                this.stage.fillStyle = "rgba(200,200,240,1)";
+                this.stage.fill();
+
+                //naslov
+                this.stage.strokeStyle = "black";
+                this.stage.lineWidth = 2;
+                this.stage.font = "bold 50px Arial";
+                this.stage.fillStyle = "rgba(255,0,200,1)";
+                this.stage.strokeText('Datawind', this.stageCenterX, this.menuY + 50);
+                this.stage.fillText('Datawind', this.stageCenterX, this.menuY + 50);
+
+                this.stage.strokeStyle = "black";
+                this.stage.lineWidth = 3;
+
+                //opcija 1
+                this.stage.beginPath();
+                this.stage.rect(this.menuX + 25, this.menuY + 75, this.menuWidth - 50, 50);
+                this.stage.closePath();
+                this.stage.stroke();
+                this.stage.fillStyle = "rgba(50,50,50,1)";
+                this.stage.fill();
+
+                //opcija 1 tekst
+                this.stage.font = "bold 35px Arial";
+                this.stage.fillStyle = "rgba(255,0,0,1)";
+                let text1 = 'Resume game';
+                if (this.paused) {
+                    let text1 = 'Resume game';
+                } else if (!this.started) {
+                    text1 = 'Start game';
+                } else if (this.dead) {
+                    this.stage.fillText('You were destroyed!', this.stageCenterX, this.menuY - 40);
+
+                    text1 = 'Restart?'
+                } else if (this.levelEnd) {
+                    this.stage.fillStyle = "rgba(0,255,0,1)";
+                    this.stage.fillText('Congratulations!', this.stageCenterX, this.menuY - 40);
+
+                    text1 = 'Next Level'
+                }
+                this.stage.fillText(text1, this.stageCenterX, this.menuY + 112);
+
+                //kontrole tekst
+                this.stage.font = "bold 16px Arial";
+                this.stage.fillStyle = "rgba(0,0,0,1)";
+                this.stage.fillText('Controls:', this.stageCenterX, this.menuY + 150);
+                this.stage.font = "16px Arial";
+                this.stage.fillText('Movement:    WASD or arrow keys', this.stageCenterX, this.menuY + 170);
+                this.stage.fillText('Shoot:    Spacebar key', this.stageCenterX - 8, this.menuY + 190);
+                this.stage.fillText('Pause/Menu:    Esc key', this.stageCenterX - 53, this.menuY + 210);
+                this.stage.fillText('Menu option:    Enter key', this.stageCenterX - 46, this.menuY + 230);
+                if (!this.started) {
+                    this.stage.fillText("Click 'Start game' to continue!", this.stageCenterX, this.menuY + 250);
+                }
+
+                //opcija 2
+                this.stage.beginPath();
+                this.stage.rect(this.menuX + 25, this.menuY + 260, this.menuWidth - 50, 50);
+                this.stage.closePath();
+                this.stage.stroke();
+                this.stage.fillStyle = "rgba(50,50,50,1)";
+                this.stage.fill();
+
+                //opcija 2 tekst
+                this.stage.font = "bold 35px Arial";
+                this.stage.fillStyle = "rgba(255,0,0,1)";
+                this.stage.fillText('Return to site', this.stageCenterX, this.menuY + 297);
+
+                //footer tekst
+                this.stage.font = "20px Arial";
+                this.stage.fillStyle = "rgba(0,0,0,1)";
+                this.stage.fillText('© Tomislav Petrović 2019.', this.stageCenterX, this.menuY + 340);
+            }
+
+
+            mainLoop() {
+
+                //glavna petlja igre
+                //čeka ako zvuk nije učitan
+                if (this.running) {
+                    this.clearStage();
+
+                    this.checkBullets();
+                    this.checkEnemyBodies();
+
+                    this.renderBackground();
+
+                    this.renderPlayer();
+                    this.renderEnemies();
+
+                    this.renderEnemyBullets();
+                    this.renderPlayerBullets();
+
+                    this.timerRecovery();
+
+                    this.renderHud();
+
+
+                    this.handleInput();
+
+                    this.enemyDo();
+
+                    this.checkEnemiesDead();
+                    this.cycleEntities();
+
+                } else {
+                    //crta pozadinu ako je prije početka igre
+                    if (!this.started) {
+                        this.clearStage();
+                        this.renderBackground();
+                    }
+
+                    //pokazuje menu ako igra stoji, i crta objekte
+                    this.showMenu();
+
+                    this.handleInput();
+                }
+
+                requestAnimationFrame(() => this.mainLoop());
+
+            }
+
+
+            restartGame() {
+
+                this.paused = false;
+                this.running = true;
+                this.dead = false;
+
+                //instanciranje handlera inputa
+                this.input = new Input(this.stage);
+
+                //kreiranje igrača
+                this.player = new Player(this.stage, 300, 550);
+
+                //postavljanje variabli igre
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+
+                //kreiranje neprijatelja po nacrtu
+                this.enemies = new Array();
+                this.createEnemies();
+
+                //instanciranje pozadine
+                this.background = new Background(this.stage);
+
+                //pokreće glavnu temu
+                this.sound.playTrack(0);
+
+                //liste metaka
+                this.enemyBullets = new Array();
+                this.playerBullets = new Array();
+
+            }
+
+
+            nextLevel() {
+
+                //instanciranje handlera inputa
+                this.input = new Input(this.stage);
+
+                //kreiranje igrača
+                this.player = new Player(this.stage, 300, 550);
+
+                //postavljanje variabli igre
+                this.level++;
+
+                //kreiranje neprijatelja po nacrtu
+                this.enemies = new Array();
+                this.createEnemies();
+
+                //instanciranje pozadine
+                this.background = new Background(this.stage);
+
+                //liste metaka
+                this.enemyBullets = new Array();
+                this.playerBullets = new Array();
+
+                //pokreće glavnu temu
+                this.sound.playTrack(0);
+
+                this.paused = false;
+                this.running = true;
+                this.levelEnd = false;
+            }
+
+
+            startGame() {
+                this.started = true;
+                this.running = true;
+
+                this.mainLoop();
+            }
+
+        }
+
+
+        function startGame() {
+            //pronalazi canvas prostor
+            var stageElement = document.getElementById("stage");
+
+            //kreira instancu igre
+            var game = new Game(stageElement);
+
+            //game.test2();
+            game.mainLoop();
+
+        }
+
+        //pripremi okidač za pokretanje
+        document.addEventListener("load", startGame());
+
+
+    </script>
 </body>
+
 </html>
