@@ -42,55 +42,14 @@
 
     <!--content-->
 	<div class="c-gr-1 py-3 px-3 mb-0 lead">
-		<h1 class="text-center text-light c-tx-sh">Pošaljite mi poruku!</h1>
+		<h1 class="text-center text-light c-tx-sh">Kontaktirajte me!</h1>
 		<div class="card rounded-lg border-dark my-3 p-3 c-gr-3 text-light">
-			<!--contact form-->
-			<form id="contact-form" method="post" action="kontakt" role="form" data-toggle="validator" class="needs-validation"
-				novalidate>
-				<!--messages class div je placeholder za poruke o uspjehu slanja, populiraj sa js-->
-				<div class="messages"></div>
-
-				<div class="col-md-6 mb-3">
-					<div class="form-group">
-						<label for="form_name">Vaše ime i prezime:*</label>
-						<input id="form_name" type="text" name="name" class="form-control" placeholder="Vaše ime"
-							required="true">
-						<div class="invalid-feedback">
-							Ime i prezime je potrebno.
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6 mb-3">
-					<div class="form-group">
-						<label for="form_email">Email:*</label>
-						<input id="form_email" type="email" name="email" class="form-control" placeholder="Vaš email"
-							required="true">
-						<div class="invalid-feedback">
-							Neispravan email.
-						</div>
-					</div>
-				</div>
-				<div class="col-md-6 mb-3">
-					<div class="form-group">
-						<label for="form_message">Poruka:*</label>
-						<textarea id="form_message" name="message" class="form-control" placeholder="Poruka za mene" rows="4"
-							required="true"></textarea>
-						<div class="invalid-feedback">
-							Molim, ostavite poruku.
-						</div>
-					</div>
-					<div class="mt-4 mb-3">
-						<input type="submit" class="btn btn-warning btn-send btn-lg border-dark rounded-lg" value="Pošalji poruku">
-					</div>
-				</div>
-				<div class="col-md-12 mb-3">
-					<p class="text-muted">
-						<strong>*</strong> Ova polja su obavezna.</p>
-				</div>
-				</div>
-			</form>
-			<!--end contact form-->
 			<h5 class="ml-3 mb-0 c-tx-sh"></h5>
+			<div class="card rounded-lg border-dark my-3 p-3 c-gr-2 text-light text-center">
+				<p class="w-75 mx-auto">Možete mi poslati mail na: </p>
+				<p class="w-75 mx-auto text-primary">tomislavpetroviccontact@gmail.com</p>
+				<a href="mailto:tomislavpetroviccontact@gmail.com" class="w-50 mx-auto btn btn-warning btn-lg border-dark rounded-lg">Pošalji mail</a>
+			</div>
 		</div>
 	</div>
     <!--end content-->
